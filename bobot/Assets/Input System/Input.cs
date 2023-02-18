@@ -35,6 +35,15 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Rotation"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""20d673a9-db75-4609-a61e-84672e343903"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -92,6 +101,39 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""action"": ""Movement"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""a59808c7-e812-451a-a011-433e8fb18c8c"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rotation"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""090369b3-1a8a-4728-af08-d3a841d2c883"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rotation"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""92ebd4e4-2a0a-4d4f-8606-fe775c5e4aa2"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rotation"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -101,6 +143,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
         // Your mother
         m_Yourmother = asset.FindActionMap("Your mother", throwIfNotFound: true);
         m_Yourmother_Movement = m_Yourmother.FindAction("Movement", throwIfNotFound: true);
+        m_Yourmother_Rotation = m_Yourmother.FindAction("Rotation", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -161,11 +204,13 @@ public partial class @Input : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Yourmother;
     private IYourmotherActions m_YourmotherActionsCallbackInterface;
     private readonly InputAction m_Yourmother_Movement;
+    private readonly InputAction m_Yourmother_Rotation;
     public struct YourmotherActions
     {
         private @Input m_Wrapper;
         public YourmotherActions(@Input wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_Yourmother_Movement;
+        public InputAction @Rotation => m_Wrapper.m_Yourmother_Rotation;
         public InputActionMap Get() { return m_Wrapper.m_Yourmother; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -178,6 +223,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @Movement.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMovement;
                 @Movement.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMovement;
                 @Movement.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMovement;
+                @Rotation.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnRotation;
+                @Rotation.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnRotation;
+                @Rotation.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnRotation;
             }
             m_Wrapper.m_YourmotherActionsCallbackInterface = instance;
             if (instance != null)
@@ -185,6 +233,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @Movement.started += instance.OnMovement;
                 @Movement.performed += instance.OnMovement;
                 @Movement.canceled += instance.OnMovement;
+                @Rotation.started += instance.OnRotation;
+                @Rotation.performed += instance.OnRotation;
+                @Rotation.canceled += instance.OnRotation;
             }
         }
     }
@@ -192,5 +243,6 @@ public partial class @Input : IInputActionCollection2, IDisposable
     public interface IYourmotherActions
     {
         void OnMovement(InputAction.CallbackContext context);
+        void OnRotation(InputAction.CallbackContext context);
     }
 }
