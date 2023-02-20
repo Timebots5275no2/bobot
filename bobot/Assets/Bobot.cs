@@ -14,13 +14,18 @@ public class Bobot : MonoBehaviour
 
     float rotation;
 
+    float zero;
+
     private void Start()
     {
         input = new Input();
         input.Yourmother.Enable();
+        input.Yourmother.ResetZero.performed += NewZero;
+
+        zero = rotation;
     }
 
-    private void Update()
+        private void Update()
     {
         GetInput();
         Rotate();
@@ -43,18 +48,14 @@ public class Bobot : MonoBehaviour
 
     void Drive(Vector2 direction, float rot)
     {
-        if (direction.magnitude > 0)
-        {
-            Vector2 rot2D = new Vector2(transform.forward.x, transform.forward.z);
-            Vector2 rotated = RotateVector(direction, (Vector2ToRad(rot2D) * Mathf.Rad2Deg) + rot);
-            Debug.Log(rotated);
-            transform.position += (new Vector3(rotated.x, 0, rotated.y)) * Time.deltaTime * moveSpeed;
+        Vector2 rot2D = new Vector2(transform.forward.x, transform.forward.z);
+        Vector2 rotated = RotateVectorByDegrees(direction, (Vector2ToRad(rot2D) * Mathf.Rad2Deg) + rot - zero - 90);
+        transform.position += (new Vector3(rotated.x, 0, rotated.y)) * Time.deltaTime * moveSpeed;
 
-            Debug.DrawLine(transform.position, transform.position + (new Vector3(rotated.x, 0, rotated.y)).normalized * 3, Color.blue);
-        }
+        Debug.DrawLine(transform.position, transform.position + (new Vector3(rotated.x, 0, rotated.y)).normalized * 3, Color.blue);
     }
 
-    public Vector2 RotateVector(Vector2 orig, float rotation) { return RadToVector2(Vector2ToRad(orig)) * orig.magnitude; }
+    public Vector2 RotateVectorByDegrees(Vector2 orig, float degrees) { return RadToVector2(Vector2ToRad(orig) + (degrees * Mathf.Deg2Rad)) * orig.magnitude; }
 
     public float Vector2ToRad(Vector2 orig)
     {
@@ -81,5 +82,19 @@ public class Bobot : MonoBehaviour
         angle %= 360;
         float cos = Mathf.Cos(angle);
         return new Vector2(cos * (angle > 90 && angle < 270 ? -1 : 1), Mathf.Sin(angle));
+    }
+
+    void NewZero(InputAction.CallbackContext context)
+    {
+        zero = rotation;
+        Debug.Log("Zero: " + zero);
+    }
+
+    void sus()
+    {
+        RaycastHit sussy;
+        Physics.Raycast(transform.position, Vector3.down, out sussy, 20);
+
+        transform.rotation = Quaternion.Euler(sussy.normal);
     }
 }

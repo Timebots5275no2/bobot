@@ -53,6 +53,15 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResetZero"",
+                    ""type"": ""Button"",
+                    ""id"": ""5dfa14a6-9819-497c-a789-792e36cb5a36"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -154,6 +163,17 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""action"": ""Switch Camera Mode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2493ca03-2b53-47cd-a1be-8684ef315ea2"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetZero"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -165,6 +185,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
         m_Yourmother_Movement = m_Yourmother.FindAction("Movement", throwIfNotFound: true);
         m_Yourmother_Rotation = m_Yourmother.FindAction("Rotation", throwIfNotFound: true);
         m_Yourmother_SwitchCameraMode = m_Yourmother.FindAction("Switch Camera Mode", throwIfNotFound: true);
+        m_Yourmother_ResetZero = m_Yourmother.FindAction("ResetZero", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -227,6 +248,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
     private readonly InputAction m_Yourmother_Movement;
     private readonly InputAction m_Yourmother_Rotation;
     private readonly InputAction m_Yourmother_SwitchCameraMode;
+    private readonly InputAction m_Yourmother_ResetZero;
     public struct YourmotherActions
     {
         private @Input m_Wrapper;
@@ -234,6 +256,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
         public InputAction @Movement => m_Wrapper.m_Yourmother_Movement;
         public InputAction @Rotation => m_Wrapper.m_Yourmother_Rotation;
         public InputAction @SwitchCameraMode => m_Wrapper.m_Yourmother_SwitchCameraMode;
+        public InputAction @ResetZero => m_Wrapper.m_Yourmother_ResetZero;
         public InputActionMap Get() { return m_Wrapper.m_Yourmother; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -252,6 +275,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @SwitchCameraMode.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnSwitchCameraMode;
                 @SwitchCameraMode.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnSwitchCameraMode;
                 @SwitchCameraMode.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnSwitchCameraMode;
+                @ResetZero.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
+                @ResetZero.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
+                @ResetZero.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
             }
             m_Wrapper.m_YourmotherActionsCallbackInterface = instance;
             if (instance != null)
@@ -265,6 +291,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @SwitchCameraMode.started += instance.OnSwitchCameraMode;
                 @SwitchCameraMode.performed += instance.OnSwitchCameraMode;
                 @SwitchCameraMode.canceled += instance.OnSwitchCameraMode;
+                @ResetZero.started += instance.OnResetZero;
+                @ResetZero.performed += instance.OnResetZero;
+                @ResetZero.canceled += instance.OnResetZero;
             }
         }
     }
@@ -274,5 +303,6 @@ public partial class @Input : IInputActionCollection2, IDisposable
         void OnMovement(InputAction.CallbackContext context);
         void OnRotation(InputAction.CallbackContext context);
         void OnSwitchCameraMode(InputAction.CallbackContext context);
+        void OnResetZero(InputAction.CallbackContext context);
     }
 }
