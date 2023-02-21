@@ -13,6 +13,7 @@ public class Bobot : MonoBehaviour
     float rotateVal;
 
     float rotation;
+    Vector3 normalVector;
 
     float zero;
 
@@ -25,8 +26,9 @@ public class Bobot : MonoBehaviour
         zero = rotation;
     }
 
-        private void Update()
+    private void Update()
     {
+        sus();
         GetInput();
         Rotate();
         Drive(movementVal, rotation);
@@ -44,7 +46,11 @@ public class Bobot : MonoBehaviour
         rotation -= rotation > 360 ? 360 : 0;
     }
 
-    void Rotate() { transform.eulerAngles = Vector3.up * rotation; }
+    void Rotate()
+    {
+        Vector2 sussyMcBalls = RadToVector2(rotation * Mathf.Deg2Rad);
+        transform.rotation = Quaternion.LookRotation(new Vector3(sussyMcBalls.x, 0, sussyMcBalls.y), normalVector); 
+    }
 
     void Drive(Vector2 direction, float rot)
     {
@@ -84,6 +90,12 @@ public class Bobot : MonoBehaviour
         return new Vector2(cos * (angle > 90 && angle < 270 ? -1 : 1), Mathf.Sin(angle));
     }
 
+    public Vector3 NormalToRotation(Vector3 normal)
+    {
+
+        return Vector3.zero;
+    }
+
     void NewZero(InputAction.CallbackContext context)
     {
         zero = rotation;
@@ -94,7 +106,6 @@ public class Bobot : MonoBehaviour
     {
         RaycastHit sussy;
         Physics.Raycast(transform.position, Vector3.down, out sussy, 20);
-
-        transform.rotation = Quaternion.Euler(sussy.normal);
+        normalVector = sussy.normal;
     }
 }
