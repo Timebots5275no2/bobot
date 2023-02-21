@@ -28,12 +28,15 @@ public class Bobot : MonoBehaviour
 
     private void Update()
     {
-        sus();
+        //sus();
         GetInput();
         Rotate();
         Drive(movementVal, rotation);
 
-        Debug.DrawLine(transform.position, transform.position + transform.forward * 3, Color.green);
+        Debug.DrawLine(transform.position, transform.position + transform.forward * 3, Color.green); // Forward Vector
+
+        Vector2 yeet = RadToVector2((zero + 90) * Mathf.Deg2Rad);
+        Debug.DrawLine(transform.position, transform.position + new Vector3(yeet.x, 0, yeet.y) * 3, Color.red); // Zero Vector
     }
 
     void GetInput()
@@ -47,9 +50,11 @@ public class Bobot : MonoBehaviour
     }
 
     void Rotate()
-    {
+    { /* sussy (dont delete tho)
         Vector2 sussyMcBalls = RadToVector2(rotation * Mathf.Deg2Rad);
-        transform.rotation = Quaternion.LookRotation(new Vector3(sussyMcBalls.x, 0, sussyMcBalls.y), normalVector); 
+        transform.rotation = Quaternion.LookRotation(new Vector3(sussyMcBalls.x, 0, sussyMcBalls.y), normalVector); */
+
+        transform.eulerAngles = new Vector3(0, rotation, 0);
     }
 
     void Drive(Vector2 direction, float rot)
