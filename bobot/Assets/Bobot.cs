@@ -35,7 +35,7 @@ public class Bobot : MonoBehaviour
 
         Debug.DrawLine(transform.position, transform.position + transform.forward * 3, Color.green); // Forward Vector
 
-        Vector2 yeet = RadToVector2((zero + 90) * Mathf.Deg2Rad);
+        Vector2 yeet = RadToVector2((-zero + 90) * Mathf.Deg2Rad);
         Debug.DrawLine(transform.position, transform.position + new Vector3(yeet.x, 0, yeet.y) * 3, Color.red); // Zero Vector
     }
 
