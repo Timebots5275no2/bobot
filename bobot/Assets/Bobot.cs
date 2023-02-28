@@ -68,10 +68,10 @@ public class Bobot : MonoBehaviour
 
     public Vector2 RotateVectorByDegrees(Vector2 orig, float degrees) { return RadToVector2(Vector2ToRad(orig) + (degrees * Mathf.Deg2Rad)) * orig.magnitude; }
 
-    public float Vector2ToRad(Vector2 orig)
+    public static float Vector2ToRad(Vector2 orig)
     {
         float angle;
-        if (orig.x == 0)
+        if (orig.x == 0) 
         {
             if (orig.y < 0) { angle = 270 * Mathf.Deg2Rad; }
             else { angle = 90 * Mathf.Deg2Rad; }
@@ -88,7 +88,7 @@ public class Bobot : MonoBehaviour
         return angle;
     }
 
-    public Vector2 RadToVector2(float angle)
+    public static Vector2 RadToVector2(float angle)
     {
         angle %= 360;
         float cos = Mathf.Cos(angle);
