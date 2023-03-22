@@ -21,12 +21,12 @@ public class KinematicsController : MonoBehaviour
     readonly float Move_Sequence_Allowed_Error = 0.5f;
     readonly float Move_Points_Per_Inch = 1;
 
-    readonly float farthestBackTargetPos = -14;
-    readonly float bumperFrontXPos = 7;
-    readonly float frontXPos = 20;
-    readonly float robotLargestY = -9;
-    readonly float robotSmallestY = -19.5f;
-    readonly float groundSmallestY = -27;
+    readonly float farthestBackChassisPos = -14; // On chart: 1, 2
+    readonly float frontOfBumperXPos = 7; // On chart: 
+    readonly float frontGroundXPos = 15;
+    readonly float insideChassisLargestY = -16.5f;
+    readonly float insideChassisSmallestY = -21f;
+    readonly float outsideChassisSmallestY = -27;
 
     readonly float ARM_FIRST_PART_LENGTH = 18;
     readonly float ARM_SECOND_PART_LENGTH = 34.5f; /*For some reason the X is typically +1 */
@@ -42,8 +42,8 @@ public class KinematicsController : MonoBehaviour
 
     private void Update()
     {
-        //GetMouseInput();
-        GetAnalogInput();
+        GetMouseInput();
+        //GetAnalogInput();
         targetPoint.position = GetClampedPosValue(targetPoint.position);
 
         MoveArm(targetPoint.position);
@@ -67,56 +67,32 @@ public class KinematicsController : MonoBehaviour
 
     public Vector2 GetClampedPosValue(Vector2 pos)
     {
-    Vector2 o = pos;
+        Vector2 o = pos;
+        float armDiff = Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH);
+        float farthestArmReach = kinematics.totalDistance();
 
-        if (o.x<farthestBackTargetPos) { o.x = farthestBackTargetPos; }
+        if (o.x < frontOfBumperXPos) // Inside chassis
+        {
+            if (o.y > insideChassisLargestY && o.x < 0) { o.y = insideChassisLargestY; }
+            else if (o.y < insideChassisSmallestY) { o.y = insideChassisSmallestY; }
+        }
+        else // Outside chassis
+        {
+            float p = PercentBetweenNumbers(o.x, frontOfBumperXPos, frontGroundXPos);
+            Vector2 point3 = new Vector2(frontOfBumperXPos, insideChassisSmallestY);
+            Vector2 point4 = new Vector2(frontGroundXPos, outsideChassisSmallestY);
+            o.y = clampNumber(o.y, Vector2.Lerp(point3, point4, p).y, farthestArmReach);
 
-if (o.x < bumperFrontXPos) // Inside robot
-{
-    o.y = clampNumber(o.y, robotSmallestY, robotLargestY);
-}
-else if (o.x < frontXPos) // Within front bounds
-{
-    float p = PercentBetweenNumbers(o.x, bumperFrontXPos, frontXPos);
-
-    Vector2 bumperDownMax = new Vector2(bumperFrontXPos, robotSmallestY);
-    Vector2 bumperUpMax = new Vector2(bumperFrontXPos, robotLargestY);
-
-    Vector2 oDownMax = new Vector2(frontXPos, groundSmallestY);
-    Vector2 oUpMax = new Vector2(frontXPos, kinematics.totalDistance());
-
-    o.y = clampNumber(o.y, Vector2.Lerp(bumperDownMax, oDownMax, p).y, Vector2.Lerp(bumperUpMax, oUpMax, p).y);
-}
-else // oside of front bounds
-{
-    o.y = clampNumber(o.y, groundSmallestY, kinematics.totalDistance());
-}
-
-        float theNumber = Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH) + .5f;
-if (o.magnitude < theNumber) { o = o.normalized * theNumber; }
-o = Vector2.ClampMagnitude(o, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH - .5f);
-o.x = clampNumber(o.x, farthestBackTargetPos, FARTHEST_EXTENSION_POINT);
-return o;
-
-        /*Vector2 clampedPos = new Vector2(pos.x, pos.y);
-
-        Vector2 betweenIndexs = GetConstraintsBetween(pos); // x is first index, y is second index
-        Vector2 diffBetweenPoints = ArmConstants.ground_Constraints[(int)betweenIndexs.x].substract(ArmConstants.ground_Constraints[(int)betweenIndexs.y]);
-        double percentBetweenIndexs = PercentBetweenNumbers(pos.x, ArmConstants.ground_Constraints[(int)betweenIndexs.x].x, ArmConstants.ground_Constraints[(int)betweenIndexs.y].x);
-        Vector2 clampPos = Vector2.lerp(ArmConstants.ground_Constraints[(int)betweenIndexs.x], ArmConstants.ground_Constraints[(int)betweenIndexs.y], percentBetweenIndexs); // Position at the percent (lerped)
-
-        if (Vector2.distance(pos, clampPos) <= ArmConstants.gripperRadius || clampPos.y > pos.y + ArmConstants.gripperRadius) { clampedPos = clampPos.add(Vector2.clampMagnitude(new Vector2(diffBetweenPoints.y > 0 ? -1 : 1, 1), 1).times(ArmConstants.gripperRadius)); }
-        return Vector2.clampMagnitude(clampedPos, kinematics.totalDistance()); // Clamps  value to total distance of the arm
-      }
-
-      Vector2 GetConstraintsBetween(Vector2 pos) {
-        for (int i = 0; i < ArmConstants.ground_Constraints.length; i++) {
-          if (ArmConstants.ground_Constraints[i].x < pos.x && i + 1 < ArmConstants.ground_Constraints.length && ArmConstants.ground_Constraints[i + 1].x > pos.x) {
-            return new Vector2(i, i + 1);
-          }
+            if (o.y < outsideChassisSmallestY) { o.y = outsideChassisSmallestY; }
         }
 
-        return new Vector2(-1, -1);*/
+        if (o.y >= 0 && o.x < armDiff) { o.x = armDiff; } // Above y=0
+
+        if (o.magnitude < armDiff + .5f) { o = o.normalized * (armDiff + .5f); } // Clamp outside min circle
+        o = Vector2.ClampMagnitude(o, farthestArmReach - .5f); // Clamp inside max circle
+        o.x = clampNumber(o.x, farthestBackChassisPos, FARTHEST_EXTENSION_POINT); // Clamping between smallest and largest allowed x value
+
+        return o;
     }
 
     float clampNumber(float val, float min, float max)
@@ -169,23 +145,35 @@ return o;
 
     void RenderDebug()
     {
+        float armDiff = Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH);
         float dist = ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH;
-        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotLargestY), new Vector2(bumperFrontXPos, robotLargestY), Color.magenta);
-        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotLargestY), new Vector2(farthestBackTargetPos, robotSmallestY), Color.magenta);
-        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotSmallestY), new Vector2(bumperFrontXPos, robotSmallestY), Color.magenta);
-        Debug.DrawLine(new Vector2(bumperFrontXPos, robotSmallestY), new Vector2(frontXPos, groundSmallestY), Color.magenta);
-        Debug.DrawLine(new Vector2(bumperFrontXPos, robotLargestY), new Vector2(frontXPos, dist), Color.magenta);
-        Debug.DrawLine(new Vector2(frontXPos, groundSmallestY), new Vector2(FARTHEST_EXTENSION_POINT, groundSmallestY), Color.magenta);
-        Debug.DrawLine(new Vector2(frontXPos, dist), new Vector2(FARTHEST_EXTENSION_POINT, dist), Color.magenta);
-        Debug.DrawLine(new Vector2(FARTHEST_EXTENSION_POINT, groundSmallestY), new Vector2(FARTHEST_EXTENSION_POINT, dist), Color.magenta);
+
+        Vector2 one = new Vector2(farthestBackChassisPos, insideChassisLargestY);
+        Vector2 two = new Vector2(farthestBackChassisPos, insideChassisSmallestY);
+        Vector2 three = new Vector2(frontOfBumperXPos, insideChassisSmallestY);
+        Vector2 four = new Vector2(frontGroundXPos, outsideChassisSmallestY);
+        Vector2 five = new Vector2(FARTHEST_EXTENSION_POINT, outsideChassisSmallestY);
+        Vector2 six = new Vector2(FARTHEST_EXTENSION_POINT, dist);
+        Vector2 seven = new Vector2(armDiff, dist);
+        Vector2 eight = new Vector2(armDiff, 0);
+        Vector2 nine = new Vector2(0, -armDiff);
+
+        Debug.DrawLine(one, two, Color.magenta);
+        Debug.DrawLine(two, three, Color.magenta);
+        Debug.DrawLine(three, four, Color.magenta);
+        Debug.DrawLine(four, five, Color.magenta);
+        Debug.DrawLine(five, six, Color.magenta);
+        Debug.DrawLine(six, seven, Color.magenta);
+        Debug.DrawLine(seven, eight, Color.magenta);
+        Debug.DrawLine(nine, one, Color.magenta);
     }
 
     private void OnDrawGizmos()
     {
         RenderDebug();
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(firstJointEncoder.position, Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH));
-        Gizmos.DrawWireSphere(firstJointEncoder.position, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH);
+        Gizmos.DrawWireSphere(firstJointEncoder.position, Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH)); // Min circle
+        Gizmos.DrawWireSphere(firstJointEncoder.position, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH); // Max circle
     }
 }
 
