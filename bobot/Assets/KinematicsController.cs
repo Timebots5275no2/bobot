@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.Windows;
-using static UnityEditor.PlayerSettings;
 
 public class KinematicsController : MonoBehaviour
 {
@@ -15,16 +13,24 @@ public class KinematicsController : MonoBehaviour
     [SerializeField] float analogSpeed;
 
     float firstJointLength = 18;
-    float secondJointLength = 28;
+    float secondJointLength = 34.5f;
     TwoJointInverseKinematics kinematics;
     Input input;
 
-    float farthestBackX = -14;
-    float frontBumperX = 7f;
-    float frontGroundPosX = 19.5f;
-    float farthestUpYOverRobot = -9f;
-    float farthestDownYOverRobot = -19.5f;
-    float farthestDownYOverGround = -28f;
+    readonly float gripperRadius = 7; // inches
+    readonly float Move_Sequence_Allowed_Error = 0.5f;
+    readonly float Move_Points_Per_Inch = 1;
+
+    readonly float farthestBackTargetPos = -14;
+    readonly float bumperFrontXPos = 7;
+    readonly float frontXPos = 20;
+    readonly float robotLargestY = -9;
+    readonly float robotSmallestY = -19.5f;
+    readonly float groundSmallestY = -27;
+
+    readonly float ARM_FIRST_PART_LENGTH = 18;
+    readonly float ARM_SECOND_PART_LENGTH = 34.5f; /*For some reason the X is typically +1 */
+    readonly float FARTHEST_EXTENSION_POINT = 48;
 
     private void Start()
     {
@@ -61,21 +67,6 @@ public class KinematicsController : MonoBehaviour
 
     public Vector2 GetClampedPosValue(Vector2 pos)
     {
-     float gripperRadius = 7; // inches
-     float Move_Sequence_Allowed_Error = 0.5f;
-     float Move_Points_Per_Inch = 1;
-
-     float farthestBackTargetPos = -14;
-     float bumperFrontXPos = 7;
-     float frontXPos = 20;
-     float robotLargestY = -9;
-     float robotSmallestY = -19.5f;
-     float groundSmallestY = -27;
-
-     float ARM_FIRST_PART_LENGTH = 18;
-     float ARM_SECOND_PART_LENGTH = 28; /*For some reason the X is typically +1 */
-     float FARTHEST_EXTENSION_POINT = 48;
-
     Vector2 o = pos;
 
         if (o.x<farthestBackTargetPos) { o.x = farthestBackTargetPos; }
@@ -174,6 +165,27 @@ return o;
     {
         float offset = 0 - min;
         return (value + offset) / (max + offset);
+    }
+
+    void RenderDebug()
+    {
+        float dist = ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH;
+        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotLargestY), new Vector2(bumperFrontXPos, robotLargestY), Color.magenta);
+        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotLargestY), new Vector2(farthestBackTargetPos, robotSmallestY), Color.magenta);
+        Debug.DrawLine(new Vector2(farthestBackTargetPos, robotSmallestY), new Vector2(bumperFrontXPos, robotSmallestY), Color.magenta);
+        Debug.DrawLine(new Vector2(bumperFrontXPos, robotSmallestY), new Vector2(frontXPos, groundSmallestY), Color.magenta);
+        Debug.DrawLine(new Vector2(bumperFrontXPos, robotLargestY), new Vector2(frontXPos, dist), Color.magenta);
+        Debug.DrawLine(new Vector2(frontXPos, groundSmallestY), new Vector2(FARTHEST_EXTENSION_POINT, groundSmallestY), Color.magenta);
+        Debug.DrawLine(new Vector2(frontXPos, dist), new Vector2(FARTHEST_EXTENSION_POINT, dist), Color.magenta);
+        Debug.DrawLine(new Vector2(FARTHEST_EXTENSION_POINT, groundSmallestY), new Vector2(FARTHEST_EXTENSION_POINT, dist), Color.magenta);
+    }
+
+    private void OnDrawGizmos()
+    {
+        RenderDebug();
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(firstJointEncoder.position, Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH));
+        Gizmos.DrawWireSphere(firstJointEncoder.position, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH);
     }
 }
 
