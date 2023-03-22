@@ -62,11 +62,20 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MousePos"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""bdf932d4-ff93-4fb6-83c6-11aca240cc3b"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
                 {
-                    ""name"": ""2D Vector"",
+                    ""name"": ""WASD"",
                     ""id"": ""06fd7ae2-415e-4257-ab81-eaa1066d8001"",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
@@ -113,6 +122,61 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""name"": ""right"",
                     ""id"": ""e22d7f9a-4ab2-409d-aa2d-de50808dabb9"",
                     ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Joystick"",
+                    ""id"": ""866f5847-d93a-4b6e-8206-b9d0fbcce59d"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""a63c01a4-5670-42ef-974d-6b661f50e5e6"",
+                    ""path"": ""<Joystick>/stick/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""5a9eaa3d-bf96-4aba-9ec3-88305b9950d7"",
+                    ""path"": ""<Joystick>/stick/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""498c9f3f-6a29-46aa-9122-18b4b4bd02a3"",
+                    ""path"": ""<Joystick>/stick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""9ca54de3-98d3-42ac-888e-29e0bc829f19"",
+                    ""path"": ""<Joystick>/stick/right"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -174,6 +238,17 @@ public partial class @Input : IInputActionCollection2, IDisposable
                     ""action"": ""ResetZero"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ec863162-b549-4077-b25c-65ab2a45aea9"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MousePos"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -186,6 +261,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
         m_Yourmother_Rotation = m_Yourmother.FindAction("Rotation", throwIfNotFound: true);
         m_Yourmother_SwitchCameraMode = m_Yourmother.FindAction("Switch Camera Mode", throwIfNotFound: true);
         m_Yourmother_ResetZero = m_Yourmother.FindAction("ResetZero", throwIfNotFound: true);
+        m_Yourmother_MousePos = m_Yourmother.FindAction("MousePos", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -249,6 +325,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
     private readonly InputAction m_Yourmother_Rotation;
     private readonly InputAction m_Yourmother_SwitchCameraMode;
     private readonly InputAction m_Yourmother_ResetZero;
+    private readonly InputAction m_Yourmother_MousePos;
     public struct YourmotherActions
     {
         private @Input m_Wrapper;
@@ -257,6 +334,7 @@ public partial class @Input : IInputActionCollection2, IDisposable
         public InputAction @Rotation => m_Wrapper.m_Yourmother_Rotation;
         public InputAction @SwitchCameraMode => m_Wrapper.m_Yourmother_SwitchCameraMode;
         public InputAction @ResetZero => m_Wrapper.m_Yourmother_ResetZero;
+        public InputAction @MousePos => m_Wrapper.m_Yourmother_MousePos;
         public InputActionMap Get() { return m_Wrapper.m_Yourmother; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -278,6 +356,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @ResetZero.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
                 @ResetZero.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
                 @ResetZero.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnResetZero;
+                @MousePos.started -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMousePos;
+                @MousePos.performed -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMousePos;
+                @MousePos.canceled -= m_Wrapper.m_YourmotherActionsCallbackInterface.OnMousePos;
             }
             m_Wrapper.m_YourmotherActionsCallbackInterface = instance;
             if (instance != null)
@@ -294,6 +375,9 @@ public partial class @Input : IInputActionCollection2, IDisposable
                 @ResetZero.started += instance.OnResetZero;
                 @ResetZero.performed += instance.OnResetZero;
                 @ResetZero.canceled += instance.OnResetZero;
+                @MousePos.started += instance.OnMousePos;
+                @MousePos.performed += instance.OnMousePos;
+                @MousePos.canceled += instance.OnMousePos;
             }
         }
     }
@@ -304,5 +388,6 @@ public partial class @Input : IInputActionCollection2, IDisposable
         void OnRotation(InputAction.CallbackContext context);
         void OnSwitchCameraMode(InputAction.CallbackContext context);
         void OnResetZero(InputAction.CallbackContext context);
+        void OnMousePos(InputAction.CallbackContext context);
     }
 }

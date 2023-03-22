@@ -66,7 +66,7 @@ public class Bobot : MonoBehaviour
         Debug.DrawLine(transform.position, transform.position + (new Vector3(rotated.x, 0, rotated.y)).normalized * 3, Color.blue);
     }
 
-    public Vector2 RotateVectorByDegrees(Vector2 orig, float degrees) { return RadToVector2(Vector2ToRad(orig) + (degrees * Mathf.Deg2Rad)) * orig.magnitude; }
+    public static Vector2 RotateVectorByDegrees(Vector2 orig, float degrees) { return RadToVector2(Vector2ToRad(orig) + (degrees * Mathf.Deg2Rad)) * orig.magnitude; }
 
     public static float Vector2ToRad(Vector2 orig)
     {

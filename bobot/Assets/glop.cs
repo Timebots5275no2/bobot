@@ -8,6 +8,8 @@ public class glop : MonoBehaviour
 {
     [SerializeField] float pitch;
     [SerializeField] float roll;
+    [Header("Circl")]
+    [SerializeField] int circlePoints = 8;
 
     Vector3 orig;
 
@@ -15,13 +17,35 @@ public class glop : MonoBehaviour
     {
         Debug.DrawLine(transform.position, transform.position + (transform.forward * 3), Color.green);
 
-        Matrix posMatrix = Matrix.PositionMatrix(Vector3.forward);
+        /*Matrix posMatrix = Matrix.PositionMatrix(Vector3.forward);
         Matrix rotationMatrix = Matrix.RotationMatrix(transform.eulerAngles * Mathf.Deg2Rad);
         Matrix rotated = rotationMatrix * posMatrix;
 
-        Debug.DrawLine(transform.position, transform.position + (Vector3)rotated * 3, Color.red);
+        Debug.DrawLine(transform.position, transform.position + (Vector3)rotated * 3, Color.red);*/
+
+        GetRotationDir();
     }
 
+    void GetRotationDir()
+    {
+        Matrix rot = Matrix.RotationMatrix(transform.eulerAngles * Mathf.Deg2Rad);
+        Vector3 highestPos = Vector3.negativeInfinity;
+
+        for (int i = 0; i < circlePoints; i++)
+        {
+            Vector2 sussyOnGlussyNoKyussy = Bobot.RadToVector2(((circlePoints / 360) * i) * Mathf.Deg2Rad);
+            Vector3 pos = new Vector3(sussyOnGlussyNoKyussy.x, 0, sussyOnGlussyNoKyussy.y);
+            Matrix posMatrix = Matrix.PositionMatrix(pos);
+
+            Vector3 rotatedPos = (Vector3)(rot * posMatrix);
+
+            if (highestPos.y < rotatedPos.y) { highestPos = rotatedPos; }
+
+            Debug.DrawLine(transform.position, transform.position + (rotatedPos * 2), Color.red);
+        }
+
+        Debug.DrawLine(transform.position, transform.position + (highestPos * 2), Color.blue);
+    }
 }
 
 public class Matrix
