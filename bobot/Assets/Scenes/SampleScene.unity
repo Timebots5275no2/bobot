@@ -1258,13 +1258,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 1792337353}
-  firstJointEncoder: {fileID: 1243694462}
-  secondJointEncoder: {fileID: 19104103}
+  firstJointTransform: {fileID: 1243694462}
+  secondJointTransform: {fileID: 19104103}
   refCam: {fileID: 963194227}
   mouseScreenPos: {x: 0, y: 0, z: 0}
   mouseWorldPos: {x: 0, y: 0, z: 0}
   analogInput: {x: 0, y: 0, z: 0}
   analogSpeed: 18
+  firstJointEncoder:
+    speed: 0
+  secondJointEncoder:
+    speed: 0
 --- !u!4 &1719684210
 Transform:
   m_ObjectHideFlags: 0

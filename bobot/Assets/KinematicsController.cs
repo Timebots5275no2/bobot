@@ -3,14 +3,17 @@ using UnityEngine;
 public class KinematicsController : MonoBehaviour
 {
     [SerializeField] Transform targetPoint;
-    [SerializeField] Transform firstJointEncoder;
-    [SerializeField] Transform secondJointEncoder;
+    [SerializeField] Transform firstJointTransform;
+    [SerializeField] Transform secondJointTransform;
     [SerializeField] Camera refCam;
     [Header("Values")]
     [SerializeField] Vector3 mouseScreenPos;
     [SerializeField] Vector3 mouseWorldPos;
     [SerializeField] Vector3 analogInput;
     [SerializeField] float analogSpeed;
+    [Header("Encoders")]
+    [SerializeField] MotorEncoder firstJointEncoder;
+    [SerializeField] MotorEncoder secondJointEncoder;
 
     float firstJointLength = 18;
     float secondJointLength = 34.5f;
@@ -38,6 +41,9 @@ public class KinematicsController : MonoBehaviour
         input = new Input();
         input.Yourmother.MousePos.Enable();
         input.Yourmother.Movement.Enable();
+
+        firstJointEncoder = new MotorEncoder(firstJointTransform);
+        secondJointEncoder = new MotorEncoder(secondJointTransform);
     }
 
     private void Update()
@@ -47,6 +53,9 @@ public class KinematicsController : MonoBehaviour
         targetPoint.position = GetClampedPosValue(targetPoint.position);
 
         MoveArm(targetPoint.position);
+
+        firstJointEncoder.UpdateEncoder(Time.deltaTime);
+        secondJointEncoder.UpdateEncoder(Time.deltaTime);
     }
 
     void GetAnalogInput()
@@ -104,8 +113,8 @@ public class KinematicsController : MonoBehaviour
 
     void MoveArm(Vector2 pos)
     {
-        firstJointEncoder.localEulerAngles = Vector3.forward * kinematics.solveFirstJoint(pos);
-        secondJointEncoder.localEulerAngles = Vector3.forward * kinematics.solveSecondJoint(pos);
+        firstJointEncoder.SetReference(kinematics.solveFirstJoint(pos));
+        secondJointEncoder.SetReference(kinematics.solveSecondJoint(pos));
     }
 
     public Vector2 RotateVectorByDegrees(Vector2 orig, float degrees) { return RadToVector2(Vector2ToRad(orig) + (degrees * Mathf.Deg2Rad)) * (orig.magnitude); }
@@ -172,8 +181,8 @@ public class KinematicsController : MonoBehaviour
     {
         RenderDebug();
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(firstJointEncoder.position, Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH)); // Min circle
-        Gizmos.DrawWireSphere(firstJointEncoder.position, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH); // Max circle
+        Gizmos.DrawWireSphere(firstJointTransform.position, Mathf.Abs(ARM_FIRST_PART_LENGTH - ARM_SECOND_PART_LENGTH)); // Min circle
+        Gizmos.DrawWireSphere(firstJointTransform.position, ARM_FIRST_PART_LENGTH + ARM_SECOND_PART_LENGTH); // Max circle
     }
 }
 
@@ -213,4 +222,39 @@ public class TwoJointInverseKinematics
     }
 
     public float totalDistance() { return firstJointLength + secondJointLength; }
+}
+
+[System.Serializable]
+public class MotorEncoder
+{
+    [SerializeField]Transform transform;
+    [SerializeField] float targetAngle;
+    [SerializeField] float actualAngle;
+    [SerializeField] float speed = 50;
+    [SerializeField] float change;
+
+    float angle;
+
+    public MotorEncoder(Transform transformToRotate)
+    {
+        transform = transformToRotate;
+        angle = transformToRotate.localEulerAngles.z;
+    }
+
+    public void SetReference(float angle) { targetAngle = angle; }
+
+    public void UpdateEncoder(float delta)
+    {
+        actualAngle = transform.localEulerAngles.z;
+
+        float targ = targetAngle + (targetAngle < 0 ? 360 : 0);
+        float dir = 0;
+
+        if (targ >= 270 && actualAngle < 90) { dir = -1; }
+        else { dir = Mathf.Sign(targ - actualAngle); }
+
+        change = dir * speed * delta;
+
+        transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, transform.localEulerAngles.z + change);
+    }
 }
